@@ -5,22 +5,24 @@
 // button clear - clear board and start a new game
 
 var turn = 0;
-var state = new Array(9);
-var positions = [];
 
 function player() {
   return turn%2 === 0 ? 'X' : 'O';
 }
 
 function getPositions() {
-  positions = $("td");
+  return $("td");
 }
 
 function getState() {
-  getPositions();
+  var state = state || new Array(9);
+  var positions = getPositions();
+  
   for (const [i, el] of state.entries()) {
     state[i] = positions[i].innerHTML;
   }
+
+  return state;
 }
 
 function updateState(position) {
@@ -33,12 +35,12 @@ function setMessage(message) {
 }
 
 function checkWinner() {
-  getState();
   var win = false;
   var winner; 
-  const winning_combos = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]; 
+  const winning_combos = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
+  var state = getState();
 
-  for(let combo of winning_combos) {
+  for(const combo of winning_combos) {
     // is there a cleaner way of putting the declarations and assignments? no nice multi assign like ruby
     var a = state[combo[0]];
     var b = state[combo[1]];
@@ -49,13 +51,11 @@ function checkWinner() {
     if(!empty && match) {
       win = true;
       winner = a;
+      setMessage("Player " + winner + " Won!");
       break;
     }
   }
-    
-  if(win) {
-    setMessage("Player " + winner + " Won!");
-  }
+  
   return win;
 }
 
@@ -68,7 +68,7 @@ function checkTie() {
 
 function resetBoard() {
   turn = 0;
-  for(let position of positions) {
+  for(const position of getPositions()) {
     position.innerHTML = "";
   }
 }
