@@ -46,7 +46,7 @@ function checkWinner() {
     var b = state[combo[1]];
     var c = state[combo[2]];
     var empty = a === "" || b === "" || c === "";
-    var match = a == b && a == c;
+    var match = a === b && a === c;
     
     if(!empty && match) {
       win = true;
