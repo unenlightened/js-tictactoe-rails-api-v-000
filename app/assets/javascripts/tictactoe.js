@@ -5,13 +5,24 @@
 // button clear - clear board and start a new game
 
 var turn = 0;
-var winning_combos = []; //can be like rails or based on x matching, y matching and diagonals
+var state = new Array(9);
+var positions = [];
 
 function player() {
   return turn%2 === 0 ? 'X' : 'O';
 }
 
-// position passed as square[0], view is labled as data-x="0" and data-y="0" create a definition array to match
+function getPositions() {
+  positions = $("td");
+}
+
+function getState() {
+  getPositions();
+  for (const [i, el] of state.entries()) {
+    state[i] = positions[i].innerHTML;
+  }
+}
+
 function updateState(position) {
   var playerChar = player();
   $(position).text(playerChar);
@@ -21,18 +32,57 @@ function setMessage(message) {
   $('#message').text(message);
 }
 
-//create a winning_combo definition
 function checkWinner() {
-  var win = false;  //match current tokens to winning_combos
-  if(win) {
-    setMessage("Player " + player() + " Won!");
+  getState();
+  var win = false;
+  var winner; 
+  const winning_combos = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]; 
+
+  for(let combo of winning_combos) {
+    // is there a cleaner way of putting the declarations and assignments? no nice multi assign like ruby
+    var a = state[combo[0]];
+    var b = state[combo[1]];
+    var c = state[combo[2]];
+    var empty = a === "" || b === "" || c === "";
+    var match = a == b && a == c;
+    
+    if(!empty && match) {
+      win = true;
+      winner = a;
+      break;
+    }
   }
-  return win ? "true" : "false"
+    
+  if(win) {
+    setMessage("Player " + winner + " Won!");
+  }
+  return win;
 }
 
-//how is position passed onclick?
+function checkTie() {
+  if(turn === 8) {
+    setMessage("Tie game.");
+    return true;
+  }
+}
+
+function resetBoard() {
+  turn = 0;
+  for(let position of positions) {
+    position.innerHTML = "";
+  }
+}
+
 function doTurn() {
-  turn++;
   updateState();
-  checkWinner();
+  if(checkWinner() || checkTie()) {
+    resetBoard();
+  } else {
+    turn++;
+  }
+}
+
+// this one needs to wait for doc.done. it's 12am. sleep timez
+function attachListeners() {
+  
 }
