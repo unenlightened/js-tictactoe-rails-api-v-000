@@ -7,7 +7,7 @@
 var turn = 0;
 
 function player() {
-  return turn%2 === 0 ? 'X' : 'O';
+  return ( turn%2 === 0 ) ? 'X' : 'O';
 }
 
 function getPositions() {
@@ -34,14 +34,14 @@ function setMessage(message) {
   $('#message').text(message);
 }
 
+// this function feels big. is there a smaller way of doing this or should it be broken down further?
+// is there a cleaner way of putting the declarations and assignments? no nice multi assign like ruby
 function checkWinner() {
   var win = false;
-  var winner; 
   const winning_combos = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
   var state = getState();
 
   for(const combo of winning_combos) {
-    // is there a cleaner way of putting the declarations and assignments? no nice multi assign like ruby
     var a = state[combo[0]];
     var b = state[combo[1]];
     var c = state[combo[2]];
@@ -50,12 +50,11 @@ function checkWinner() {
     
     if(!empty && match) {
       win = true;
-      winner = a;
+      var winner = a;
       setMessage("Player " + winner + " Won!");
       break;
     }
   }
-  
   return win;
 }
 
