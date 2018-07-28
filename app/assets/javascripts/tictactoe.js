@@ -1,4 +1,4 @@
-var ID;
+var ID = 0;
 var turn = 0;
 
 function player() {
@@ -61,14 +61,14 @@ function checkTurn(moves = state()) {
 
 function resetBoard() {
   turn = 0;
-  ID = undefined; // this feels so wrong...
+  ID = 0;
   for(const position of positions()) {
     $(position).empty();
   }
 }
 
 function gameOver() {
-  return checkWinner() || checkTie();
+  return checkTie() || checkWinner();
 }
 
 function doTurn(position) {
@@ -91,7 +91,7 @@ function attachListeners() {
   $('button#clear').on('click', resetBoard);
 
   $(positions()).on('click', function() {
-    if (!gameOver() && this.innerHTML === "") {
+    if (this.innerHTML === "" && !gameOver()) {
       doTurn(this);
     }
   });
@@ -129,16 +129,15 @@ function loadGame(button) {
 }
 
 function saveGame() {
-  if(typeof ID === "undefined") {
-    var posting = $.post("/games", state());
-    posting.done(function(game) {
-      ID = Number(game["data"]["id"]);
-    });
-  } else {
+  if(ID) {
     $.ajax({
       url: "/games/" + ID,
       data: state(),
       type: 'PATCH'
     })
+  } else {
+    $.post("/games", state(), function(game) {
+      ID = Number(game["data"]["id"]);
+    });
   }
 }
