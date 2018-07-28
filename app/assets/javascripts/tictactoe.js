@@ -1,6 +1,5 @@
 var ID;
 var turn = 0;
-var state;
 
 function player() {
   var player = player || ( turn%2 === 0 ) ? 'X' : 'O';
@@ -12,29 +11,26 @@ function positions() {
   return positions;
 }
 
-function getState() {
-  return Array.from(positions()).map(position => position.innerHTML);
+function state() {
+  var state = state || Array.from(positions()).map(position => position.innerHTML);
+  return state;
 }
 
 function updateState(position) {
   $(position).text(player());
-  state = getState();
 }
 
 function setMessage(message) {
-  $('#message').text(message);
+  $('#message').html("<br>" + message + "<br>");
 }
 
-// this function feels big. is there a smaller way of doing this or should it be broken down further?
-// have to manually declare set state in here, bc the tests just call on the checkwinner function only
 function checkWinner() {
-  var win = false,
-      state = getState();
   const winning_combos = [ [0, 1, 2], [3, 4, 5], [6, 7, 8],
   [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
+  var win = false;
 
   for(const combo of winning_combos) {
-    var a = state[combo[0]],  b = state[combo[1]], c = state[combo[2]];
+    var a = state()[combo[0]],  b = state()[combo[1]], c = state()[combo[2]];
     var empty = a === "" || b === "" || c === "";
     var match = a === b && a === c;
 
@@ -54,24 +50,36 @@ function checkTie() {
   }
 }
 
+function checkTurn(moves = state()) {
+  turn = 0;
+  moves.forEach(function(position) {
+    if(position === 'X' || position === 'O') {
+      turn++;
+    }
+  })
+}
+
 function resetBoard() {
   turn = 0;
   ID = undefined; // this feels so wrong...
   for(const position of positions()) {
-    $(position).text("");
+    $(position).empty();
   }
-  setMessage("");
+}
+
+function gameOver() {
+  return checkWinner() || checkTie();
 }
 
 function doTurn(position) {
-  if(position.innerHTML === "") {
-    updateState(position);
-    checkTurn();
+  updateState(position);
+  checkTurn();
+  if(turn === 1) {
+    setMessage("");
   }
-  if(checkWinner() || checkTie()) {
-    updateState();
+  if(gameOver()) {
     saveGame();
-    $(positions()).on('click',resetBoard);
+    resetBoard();
   }
 }
 
@@ -82,8 +90,10 @@ function attachListeners() {
   $('button#previous').on('click', previousGames);
   $('button#clear').on('click', resetBoard);
 
-  $(positions()).on('click', function() { 
-    doTurn(this); 
+  $(positions()).on('click', function() {
+    if (!gameOver() && this.innerHTML === "") {
+      doTurn(this);
+    }
   });
 }
 
@@ -91,34 +101,16 @@ function previousGames() {
   var div = $('#games');
   div.empty();
 
-  var appending = $.getJSON("/games", function(games) {
+  var listing = listing || $.getJSON("/games", function(games) {
     $.each(games["data"], function(key, val) {
-      div.append("<button>" + val.id + "</button><br>");
+      var date = new Date(val["attributes"]["updated-at"]).toLocaleString("en-US", { month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "numeric" });
+      div.append("<button>" + val["id"] + "</button> " + date + "<br>");
     })
   })
-  appending.done(function() {
+  listing.done(function() {
     $('#games button').on('click', function() {
       loadGame(this);
     })
-  })
-}
-
-function saveGame() {
-  if(typeof ID === "undefined") {
-    var posting = $.post("/games", state);
-    posting.done(function(game) {
-      ID = Number(game["data"]["id"]);
-    });
-  } else {
-    postGame();
-  }
-}
-
-function postGame() {
-  $.ajax({
-    url: "/games/" + ID,
-    data: state,
-    type: 'PATCH'
   })
 }
 
@@ -136,11 +128,17 @@ function loadGame(button) {
   })
 }
 
-function checkTurn(moves = state) {
-  turn = 0;
-  moves.forEach(function(position) {
-    if(position === 'X' || position === 'O') {
-      turn++;
-    }
-  })
+function saveGame() {
+  if(typeof ID === "undefined") {
+    var posting = $.post("/games", state());
+    posting.done(function(game) {
+      ID = Number(game["data"]["id"]);
+    });
+  } else {
+    $.ajax({
+      url: "/games/" + ID,
+      data: state(),
+      type: 'PATCH'
+    })
+  }
 }
