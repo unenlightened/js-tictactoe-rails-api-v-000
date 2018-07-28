@@ -61,7 +61,7 @@ function checkTurn(moves = state()) {
 
 function resetBoard() {
   turn = 0;
-  ID = 0; // this feels so wrong...
+  ID = 0;
   for(const position of positions()) {
     $(position).empty();
   }
