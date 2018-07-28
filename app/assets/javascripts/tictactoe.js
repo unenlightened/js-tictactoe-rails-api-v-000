@@ -130,8 +130,9 @@ function loadGame(button) {
 
 function saveGame() {
   if(typeof ID === "undefined") {
-    var posting = $.post("/games", state());
-    ID = Number(game["data"]["id"]);
+    var posting = $.post("/games", state(), function(game) {
+      ID = Number(game["data"]["id"]);
+    });
   } else {
     $.ajax({
       url: "/games/" + ID,
