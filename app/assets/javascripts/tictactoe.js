@@ -129,15 +129,15 @@ function loadGame(button) {
 }
 
 function saveGame() {
-  if(typeof ID === "undefined") {
-    var posting = $.post("/games", state(), function(game) {
-      ID = Number(game["data"]["id"]);
-    });
-  } else {
+  if(ID) {
     $.ajax({
       url: "/games/" + ID,
       data: state(),
       type: 'PATCH'
     })
+  } else {
+    $.post("/games", state(), function(game) {
+      ID = Number(game["data"]["id"]);
+    });
   }
 }
