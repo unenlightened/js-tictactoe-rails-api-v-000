@@ -1,4 +1,4 @@
-var ID = 0;
+var ID;
 var turn = 0;
 
 function player() {
@@ -61,7 +61,7 @@ function checkTurn(moves = state()) {
 
 function resetBoard() {
   turn = 0;
-  ID = 0; // this feels so wrong...
+  ID = undefined; // this feels so wrong...
   for(const position of positions()) {
     $(position).empty();
   }
@@ -129,7 +129,7 @@ function loadGame(button) {
 }
 
 function saveGame() {
-  if(typeof ID === 0) {
+  if(typeof ID === "undefined") {
     var posting = $.post("/games", state());
     posting.done(function(game) {
       ID = Number(game["data"]["id"]);
