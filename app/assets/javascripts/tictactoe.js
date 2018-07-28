@@ -1,4 +1,4 @@
-var ID;
+var ID = 0;
 var turn = 0;
 
 function player() {
