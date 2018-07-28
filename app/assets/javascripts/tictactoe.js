@@ -3,15 +3,17 @@ var turn = 0;
 var state;
 
 function player() {
-  return ( turn%2 === 0 ) ? 'X' : 'O';
+  var player = player || ( turn%2 === 0 ) ? 'X' : 'O';
+  return player;
 }
 
-function getPositions() {
-  return $("td");
+function positions() {
+  var positions = positions || $("td");
+  return positions;
 }
 
 function getState() {
-  return Array.from(getPositions()).map(position => position.innerHTML);
+  return Array.from(positions()).map(position => position.innerHTML);
 }
 
 function updateState(position) {
@@ -55,23 +57,21 @@ function checkTie() {
 function resetBoard() {
   turn = 0;
   ID = undefined; // this feels so wrong...
-  for(const position of getPositions()) {
+  for(const position of positions()) {
     $(position).text("");
   }
   setMessage("");
 }
 
 function doTurn(position) {
-  if (position.innerHTML === "") {
+  if(position.innerHTML === "") {
     updateState(position);
-    turn++;
+    checkTurn();
   }
   if(checkWinner() || checkTie()) {
-    // 325 Gameplay Users cannot play any turns once a game is won or tied:
-    //stop propagation too
     updateState();
     saveGame();
-    resetBoard();
+    $(positions()).on('click',resetBoard);
   }
 }
 
@@ -82,7 +82,9 @@ function attachListeners() {
   $('button#previous').on('click', previousGames);
   $('button#clear').on('click', resetBoard);
 
-  $(getPositions()).on('click', function() { doTurn(this); });
+  $(positions()).on('click', function() { 
+    doTurn(this); 
+  });
 }
 
 function previousGames() {
@@ -108,31 +110,37 @@ function saveGame() {
       ID = Number(game["data"]["id"]);
     });
   } else {
-    $.ajax({
-      url: "/games/" + ID,
-      data: state,
-      type: 'PATCH'
-    })
+    postGame();
   }
+}
+
+function postGame() {
+  $.ajax({
+    url: "/games/" + ID,
+    data: state,
+    type: 'PATCH'
+  })
 }
 
 function loadGame(button) {
   $.getJSON("/games/" + button.innerHTML, function(game) {
     ID = Number(game["data"]["id"]);
-    turn = 0;
-    loaded.forEach(function(position) {
-      if(position === 'X' || position === 'O') {
-        turn++;
-      }
-    })
-
     var loaded = game["data"]["attributes"]["state"];
-    var i = 0;
+    checkTurn(loaded);
 
-    var positions = getPositions();
-    for(const position of positions) {
+    var i = 0;
+    for(const position of positions()) {
       $(position).text(loaded[i]);
       i++;
+    }
+  })
+}
+
+function checkTurn(moves = state) {
+  turn = 0;
+  moves.forEach(function(position) {
+    if(position === 'X' || position === 'O') {
+      turn++;
     }
   })
 }
