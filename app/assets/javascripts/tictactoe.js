@@ -108,9 +108,7 @@ function previousGames() {
     })
   })
   listing.done(function() {
-    $('#games button').on('click', function() {
-      loadGame(this);
-    })
+    $('#games button').on('click', loadGame(this))
   })
 }
 
