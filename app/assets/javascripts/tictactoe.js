@@ -91,7 +91,7 @@ function attachListeners() {
   $('button#clear').on('click', resetBoard);
 
   $(positions()).on('click', function() {
-    if (!gameOver() && this.innerHTML === "") {
+    if (this.innerHTML === "" && !gameOver()) {
       doTurn(this);
     }
   });
