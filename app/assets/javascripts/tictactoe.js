@@ -68,7 +68,7 @@ function resetBoard() {
 }
 
 function gameOver() {
-  return checkWinner() || checkTie();
+  return checkTie() || checkWinner();
 }
 
 function doTurn(position) {
