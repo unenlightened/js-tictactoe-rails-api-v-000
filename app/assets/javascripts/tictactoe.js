@@ -131,9 +131,7 @@ function loadGame(button) {
 function saveGame() {
   if(typeof ID === "undefined") {
     var posting = $.post("/games", state());
-    posting.done(function(game) {
-      ID = Number(game["data"]["id"]);
-    });
+    ID = Number(game["data"]["id"]);
   } else {
     $.ajax({
       url: "/games/" + ID,
