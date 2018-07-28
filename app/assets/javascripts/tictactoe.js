@@ -62,7 +62,9 @@ function checkTurn(moves = state()) {
 function resetBoard() {
   turn = 0;
   ID = undefined; // this feels so wrong...
-  $(position()).empty();
+  for(const position of positions()) {
+    $(position).empty();
+  }
 }
 
 function gameOver() {
